@@ -5,24 +5,40 @@ const FirebaseService = {
     db: null,
 
     initializeFirebase() {
-        // Firebase 앱이 이미 초기화되었는지 확인
-        if (!firebase.apps.length) {
+        return new Promise((resolve, reject) => {
             try {
-                this.app = firebase.initializeApp(firebaseConfig); // gameConfig.js에 정의된 설정 사용
+                // Firebase 앱이 이미 초기화되었는지 확인
+                if (!firebase.apps.length) {
+                    this.app = firebase.initializeApp(firebaseConfig);
+                    console.log("Firebase app initialized");
+                } else {
+                    this.app = firebase.app();
+                    console.log("Using existing Firebase app");
+                }
+
+                // Auth와 Firestore 초기화
                 this.auth = firebase.auth();
                 this.db = firebase.firestore();
-                console.log("Firebase initialized successfully!");
+
+                // Auth 상태 변경 리스너 설정
+                this.auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        console.log("User is signed in:", user.uid);
+                    } else {
+                        console.log("User is signed out");
+                    }
+                });
+
+                console.log("Firebase services initialized successfully!");
+                resolve();
             } catch (error) {
                 console.error("Firebase initialization error:", error);
                 if (typeof UIManager !== 'undefined' && UIManager.elements && UIManager.elements.authMessage) {
                     UIManager.elements.authMessage.textContent = "Firebase 초기화 실패. 콘솔을 확인하세요.";
                 }
+                reject(error);
             }
-        } else {
-            this.app = firebase.app(); // 이미 초기화된 앱 가져오기
-            this.auth = firebase.auth();
-            this.db = firebase.firestore();
-        }
+        });
     },
 
     async saveUserData(userId, data) {

@@ -5,6 +5,7 @@ const BattleController = {
     autoProceedTimeoutId: null,
     lastPlayerSkillUsed: null,
     lastOpponentSkillUsed: null,
+    isProcessingRound: false,
 
     initializeBattle() {
         const availableAIProfiles = GameData.aiCharacters.filter(ai => GameData.jobs[ai.jobKey].isActive);
@@ -34,10 +35,18 @@ const BattleController = {
         UIManager.elements.battleLog.innerHTML = ''; 
         UIManager.logToBattleLog("전투 시작! AI: " + GameController.opponent.name + " (" + GameController.opponent.jobData.name + ")", "system");
         this.updateBattleScreenRoundUI();
-        UIManager.elements.nextRoundButton.disabled = false;
-        UIManager.elements.autoProceedToggle.checked = this.isAutoProceedEnabled;
-        UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
-        if (this.isAutoProceedEnabled) this.startAutoProceed();
+        // 다음 턴 버튼은 수동 진행 모드에서만 필요 (강제 자동 모드에서는 제거)
+        if (UIManager.elements.nextRoundButton) {
+             UIManager.elements.nextRoundButton.style.display = 'none'; // 버튼 숨김
+        }
+        
+        // 강제 자동 진행 시작
+        this.isAutoProceedEnabled = true;
+        if (UIManager.elements.autoProceedToggle) {
+            UIManager.elements.autoProceedToggle.checked = this.isAutoProceedEnabled;
+            UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
+        }
+        this.startAutoProceed();
     },
 
     updateBattleScreenRoundUI() {
@@ -62,79 +71,103 @@ const BattleController = {
     toggleAutoProceed() {
         this.isAutoProceedEnabled = UIManager.elements.autoProceedToggle.checked;
         UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
-        if (this.isAutoProceedEnabled && !UIManager.elements.nextRoundButton.disabled) {
-            this.startAutoProceed();
-        } else {
-            this.stopAutoProceed();
-        }
+        // 스위치 상태 변경 시 현재 타이머를 멈추고 새 타이머 시작
+        this.stopAutoProceed(); 
+        this.startAutoProceed();
     },
 
     startAutoProceed() {
-        this.stopAutoProceed(); 
-        if (this.isAutoProceedEnabled && !UIManager.elements.nextRoundButton.disabled) {
+        if (this.autoProceedTimeoutId) {
+            this.stopAutoProceed(); // 기존 타이머가 있다면 제거
+        }
+        
+        const delay = this.isAutoProceedEnabled ? GameConfig.FAST_AUTO_PROCEED_DELAY : GameConfig.AUTO_PROCEED_DELAY;
+        
+        if (!this.checkBattleOver() && UIManager.elements.battleScreen.classList.contains('flex')) {
             this.autoProceedTimeoutId = setTimeout(() => {
-                if (!this.checkBattleOver() && UIManager.elements.battleScreen.classList.contains('flex')) {
+                if (!this.isProcessingRound) { // 라운드 처리 중이 아닐 때만 실행
                     this.processRoundActions();
                 }
-            }, GameConfig.AUTO_PROCEED_DELAY);
+            }, delay);
         }
     },
     stopAutoProceed() {
-        clearTimeout(this.autoProceedTimeoutId);
-        this.autoProceedTimeoutId = null;
+        if (this.autoProceedTimeoutId) {
+            clearTimeout(this.autoProceedTimeoutId);
+            this.autoProceedTimeoutId = null;
+        }
     },
 
-
     processRoundActions() {
-        if (UIManager.elements.nextRoundButton.disabled) return;
-        UIManager.elements.nextRoundButton.disabled = true; 
-        this.stopAutoProceed(); 
-
-        GameController.player.processTurnStartEffects(); 
-        GameController.opponent.processTurnStartEffects(); 
-        if (this.checkBattleOver()) return; 
-
-        const playerSkillSlotIndex = (this.currentBattleTurn - 1) % GameConfig.MAX_SKILL_SLOTS;
-        const opponentSkillSlotIndex = (this.currentBattleTurn - 1) % GameConfig.MAX_SKILL_SLOTS;
-
-        const playerSkillData = GameController.player.selectedSkills[playerSkillSlotIndex];
-        const opponentSkillData = GameController.opponent.selectedSkills[opponentSkillSlotIndex];
-
-        this.lastPlayerSkillUsed = playerSkillData ? GameData.allSkills[playerSkillData.skillKey] : null;
-        this.lastOpponentSkillUsed = opponentSkillData ? GameData.allSkills[opponentSkillData.skillKey] : null;
-
-        UIManager.logToBattleLog(`--- 턴 ${this.currentBattleTurn} 시작 ---`, "system");
-
-        if (!playerSkillData) UIManager.logToBattleLog(`${GameController.player.name}이(가) 스킬을 사용하지 않았습니다.`, 'system');
-        else UIManager.logToBattleLog(`${GameController.player.name}이(가) "${this.lastPlayerSkillUsed.name}" 스킬 사용!`, 'info');
-        
-        if (!opponentSkillData) UIManager.logToBattleLog(`${GameController.opponent.name}이(가) 스킬을 사용하지 않았습니다.`, 'system');
-        else UIManager.logToBattleLog(`${GameController.opponent.name}이(가) "${this.lastOpponentSkillUsed.name}" 스킬 사용!`, 'info');
-
-        if (playerSkillData && !GameController.player.isUnableToAct()) {
-            this.executeSingleSkill(GameController.player, GameController.opponent, this.lastPlayerSkillUsed, playerSkillData.skillKey, this.lastOpponentSkillUsed); 
-        } else if (GameController.player.isUnableToAct()) {
-            UIManager.logToBattleLog(`${GameController.player.name}은(는) 행동 불가 상태입니다.`, 'status');
-        }
-
-        if (opponentSkillData && !GameController.opponent.isUnableToAct()) {
-             this.executeSingleSkill(GameController.opponent, GameController.player, this.lastOpponentSkillUsed, opponentSkillData.skillKey, this.lastPlayerSkillUsed); 
-        } else if (GameController.opponent.isUnableToAct()) {
-             UIManager.logToBattleLog(`${GameController.opponent.name}은(는) 행동 불가 상태입니다.`, 'status');
-        }
-        
-        if (this.checkBattleOver()) return;
-
-        this.currentBattleTurn++;
-        if (this.currentBattleTurn > GameConfig.TOTAL_BATTLE_TURNS) {
-            this.endBattle(null); 
+        if (this.isProcessingRound) {
+            console.log('[processRoundActions] 이미 라운드 처리 중입니다.');
             return;
         }
-        
-        this.updateBattleScreenRoundUI();
-        if (!this.checkBattleOver()) {
-            UIManager.elements.nextRoundButton.disabled = false;
-            if (this.isAutoProceedEnabled) this.startAutoProceed(); 
+
+        console.log('[processRoundActions] 진입');
+        this.isProcessingRound = true; // 라운드 처리 시작
+        this.stopAutoProceed();
+
+        try {
+            GameController.player.processTurnStartEffects();
+            GameController.opponent.processTurnStartEffects();
+            
+            if (this.checkBattleOver()) {
+                console.log('Battle is over after processTurnStartEffects.');
+                return;
+            }
+
+            const playerSkillSlotIndex = (this.currentBattleTurn - 1) % GameConfig.MAX_SKILL_SLOTS;
+            const opponentSkillSlotIndex = (this.currentBattleTurn - 1) % GameConfig.MAX_SKILL_SLOTS;
+
+            const playerSkillData = GameController.player.selectedSkills[playerSkillSlotIndex];
+            const opponentSkillData = GameController.opponent.selectedSkills[opponentSkillSlotIndex];
+
+            this.lastPlayerSkillUsed = playerSkillData ? GameData.allSkills[playerSkillData.skillKey] : null;
+            this.lastOpponentSkillUsed = opponentSkillData ? GameData.allSkills[opponentSkillData.skillKey] : null;
+
+            UIManager.logToBattleLog(`--- 턴 ${this.currentBattleTurn} 시작 ---`, "system");
+
+            if (!playerSkillData) UIManager.logToBattleLog(`${GameController.player.name}이(가) 스킬을 사용하지 않았습니다.`, 'system');
+            else UIManager.logToBattleLog(`${GameController.player.name}이(가) "${this.lastPlayerSkillUsed.name}" 스킬 사용!`, 'info');
+            
+            if (!opponentSkillData) UIManager.logToBattleLog(`${GameController.opponent.name}이(가) 스킬을 사용하지 않았습니다.`, 'system');
+            else UIManager.logToBattleLog(`${GameController.opponent.name}이(가) "${this.lastOpponentSkillUsed.name}" 스킬 사용!`, 'info');
+
+            if (playerSkillData && !GameController.player.isUnableToAct()) {
+                this.executeSingleSkill(GameController.player, GameController.opponent, this.lastPlayerSkillUsed, playerSkillData.skillKey, this.lastOpponentSkillUsed); 
+            } else if (GameController.player.isUnableToAct()) {
+                UIManager.logToBattleLog(`${GameController.player.name}은(는) 행동 불가 상태입니다.`, 'status');
+            }
+
+            if (opponentSkillData && !GameController.opponent.isUnableToAct()) {
+                 this.executeSingleSkill(GameController.opponent, GameController.player, this.lastOpponentSkillUsed, opponentSkillData.skillKey, this.lastPlayerSkillUsed); 
+            } else if (GameController.opponent.isUnableToAct()) {
+                 UIManager.logToBattleLog(`${GameController.opponent.name}은(는) 행동 불가 상태입니다.`, 'status');
+            }
+            
+            if (this.checkBattleOver()) {
+                 console.log('Battle is over after skills execution.');
+                 return;
+            }
+
+            this.currentBattleTurn++;
+            if (this.currentBattleTurn > GameConfig.TOTAL_BATTLE_TURNS) {
+                console.log('Max turns reached.');
+                this.endBattle(null);
+                return;
+            }
+            
+            this.updateBattleScreenRoundUI();
+
+            if (!this.checkBattleOver()) {
+                this.startAutoProceed();
+            } else {
+                console.log('Battle is over, stopping auto proceed.');
+                this.stopAutoProceed();
+            }
+        } finally {
+            this.isProcessingRound = false; // 라운드 처리 완료
         }
     },
 
@@ -219,7 +252,8 @@ const BattleController = {
     },
 
     endBattle(winner) { 
-        UIManager.elements.nextRoundButton.disabled = true;
+        // 다음 턴 버튼 비활성화 로직 제거 (숨겨져 있으므로)
+        // UIManager.elements.nextRoundButton.disabled = true;
         this.stopAutoProceed(); 
         UIManager.showGameOverModal(winner, this.lastPlayerSkillUsed, this.lastOpponentSkillUsed);
     }

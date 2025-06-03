@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ralph's Colosseum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="stylesheet" href="style.css">
-    <script async src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script async src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script async src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="game-container p-3 sm:p-4">
@@ -57,25 +59,27 @@
             <div id="skillSetSlotsContainer" class="space-y-3 mb-4 w-full flex-grow overflow-y-auto min-h-[200px]">
                 </div>
             <div class="w-full space-y-2 mt-auto pt-2 border-t border-gray-600"> 
-                <button id="saveCurrentSkillsButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">현재 스킬 구성을 빈 슬롯에 저장</button>
                 <button id="startMatchButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">매칭 시작! (AI 대전)</button>
-                <button id="editCurrentSkillSetButton" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-lg shadow-md">현재 활성 세팅 수정</button>
             </div>
         </div>
 
 
         <div id="battleScreen" class="hidden flex-grow flex flex-col" role="region" aria-label="전투 화면">
-            <div class="flex items-center justify-between bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl mb-2 sm:mb-3">
-                <div id="roundInfo" class="text-sm sm:text-lg font-bold text-yellow-400" role="status" aria-live="polite">턴: 1 / 18</div>
-                <div class="flex items-center space-x-1 sm:space-x-2 mr-auto"> 
-                    <label for="autoProceedToggle" class="text-xs text-gray-400">자동:</label>
+            <div class="flex items-center bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl mb-2 sm:mb-3">
+                <div id="roundInfo" class="text-sm sm:text-lg font-bold text-yellow-400 mr-auto" role="status" aria-live="polite">턴: ${this.currentBattleTurn} / ${GameConfig.TOTAL_BATTLE_TURNS}</div>
+                
+                <div class="flex-grow text-center">
+                     <button id="nextRoundButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:py-1.5 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm inline-block">다음 턴</button>
+                </div>
+
+                <div class="flex items-center space-x-1 sm:space-x-2"> 
+                    <label for="autoProceedToggle" class="text-xs text-gray-400">SPEED 2X:</label>
                     <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
                         <input type="checkbox" name="autoProceedToggle" id="autoProceedToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
                         <label for="autoProceedToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
                     </div>
                     <span id="autoProceedStatus" class="text-xs text-indigo-400 w-8 text-center">OFF</span>
                 </div>
-                <button id="nextRoundButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:py-1.5 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm">다음 턴</button>
             </div>
 
             <div class="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
@@ -104,7 +108,7 @@
                 </div>
             </div>
             
-            <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col"> 
+            <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col min-h-[300px]"> 
                 <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
                 <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-600 p-1 sm:p-2 rounded-md space-y-1 text-xs" role="log" aria-label="전투 로그">
                     </div>
@@ -158,6 +162,17 @@
     <script src="gameController.js"></script>
     <script src="eventHandler.js"></script>
     
+    <script>
+        // Firebase 초기화 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof firebase !== 'undefined') {
+                console.log('Firebase SDK loaded');
+                FirebaseService.initializeFirebase();
+            } else {
+                console.error('Firebase SDK not loaded');
+            }
+        });
+    </script>
     <script src="main.js"></script> 
 </body>
 </html>

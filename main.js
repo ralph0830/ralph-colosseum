@@ -15,9 +15,21 @@ function initializeAppWhenFirebaseReady() {
         
         // GameController 객체가 정의되었는지, 그리고 initialize 메소드가 있는지 확인
         if (typeof GameController !== 'undefined' && typeof GameController.initialize === 'function') {
-            // Firebase SDK 및 GameController가 로드되었으므로 게임 컨트롤러 초기화
             console.log("Firebase SDK and GameController loaded. Initializing game...");
-            GameController.initialize();
+            // UIManager 요소 초기화
+            if (typeof UIManager !== 'undefined' && typeof UIManager.initializeElements === 'function') {
+                UIManager.initializeElements();
+                // UIManager 초기화 후 EventHandler 초기화
+                if (typeof EventHandler !== 'undefined' && typeof EventHandler.initialize === 'function') {
+                    EventHandler.initialize();
+                }
+            } else {
+                console.error('UIManager 또는 initializeElements 함수를 찾을 수 없습니다.');
+                // 필요한 경우 초기화 실패 처리
+                return;
+            }
+            GameController.initialize(); // GameController 초기화 (EventHandler 초기화는 이미 완료)
+            // Initialization successful - potentially hide loading screen here
         } else {
             // GameController가 아직 정의되지 않았으면 오류 로그를 남기고 잠시 후 다시 시도
             console.error("GameController is not defined or initialize method is missing. Waiting for gameController.js to load...");

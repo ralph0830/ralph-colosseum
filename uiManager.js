@@ -1,68 +1,75 @@
 // --- 모듈: UI 관리 ---
 const UIManager = {
-    elements: { 
-        gameContainer: document.querySelector('.game-container'),
-        authScreen: document.getElementById('authScreen'), 
-        emailInput: document.getElementById('emailInput'), 
-        passwordInput: document.getElementById('passwordInput'), 
-        loginButton: document.getElementById('loginButton'),
-        signupButton: document.getElementById('signupButton'), 
-        authMessage: document.getElementById('authMessage'), 
-        logoutButton: document.getElementById('logoutButton'), 
+    elements: {},
 
-        jobSelectionScreen: document.getElementById('jobSelectionScreen'),
-        playerJobSelect: document.getElementById('playerJobSelect'),
-        confirmJobButton: document.getElementById('confirmJobButton'),
-        
-        skillSelectionScreen: document.getElementById('skillSelectionScreen'),
-        playerJobName: document.getElementById('playerJobName'),
-        playerAvailableSkills: document.getElementById('playerAvailableSkills'),
-        playerSelectedSkillsContainer: document.getElementById('playerSelectedSkills'),
-        playerUpkeepDisplay: document.getElementById('playerUpkeep'),
-        confirmSkillSetupButton: document.getElementById('confirmSkillSetupButton'), 
+    initializeElements() {
+        this.elements = {
+            gameContainer: document.querySelector('.game-container'),
+            authScreen: document.getElementById('authScreen'), 
+            emailInput: document.getElementById('emailInput'), 
+            passwordInput: document.getElementById('passwordInput'), 
+            loginButton: document.getElementById('loginButton'),
+            signupButton: document.getElementById('signupButton'), 
+            authMessage: document.getElementById('authMessage'), 
+            logoutButton: document.getElementById('logoutButton'), 
 
-        skillManagementScreen: document.getElementById('skillManagementScreen'), 
-        skillSetSlotsContainer: document.getElementById('skillSetSlotsContainer'), 
-        saveCurrentSkillsButton: document.getElementById('saveCurrentSkillsButton'), 
-        startMatchButton: document.getElementById('startMatchButton'), 
-        editCurrentSkillSetButton: document.getElementById('editCurrentSkillSetButton'), 
-        currentPlayerNameDisplay_manage: document.getElementById('currentPlayerNameDisplay_manage'), 
+            jobSelectionScreen: document.getElementById('jobSelectionScreen'),
+            playerJobSelect: document.getElementById('playerJobSelect'),
+            confirmJobButton: document.getElementById('confirmJobButton'),
+            
+            skillSelectionScreen: document.getElementById('skillSelectionScreen'),
+            playerJobName: document.getElementById('playerJobName'),
+            playerAvailableSkills: document.getElementById('playerAvailableSkills'),
+            playerSelectedSkillsContainer: document.getElementById('playerSelectedSkills'),
+            playerUpkeepDisplay: document.getElementById('playerUpkeep'),
+            confirmSkillSetupButton: document.getElementById('confirmSkillSetupButton'), 
 
-        battleScreen: document.getElementById('battleScreen'),
-        playerNameDisplay: document.getElementById('playerNameDisplay'),
-        playerHp: document.getElementById('playerHp'), 
-        playerMaxHp: document.getElementById('playerMaxHp'), 
-        playerHpBar: document.getElementById('playerHpBar'),
-        playerStatus: document.getElementById('playerStatus'), 
-        playerJobImage: document.getElementById('playerJobImage'),
-        playerCurrentSkill: document.getElementById('playerCurrentSkill'), 
-        opponentNameDisplay: document.getElementById('opponentNameDisplay'),
-        opponentHp: document.getElementById('opponentHp'), 
-        opponentMaxHp: document.getElementById('opponentMaxHp'), 
-        opponentHpBar: document.getElementById('opponentHpBar'),
-        opponentStatus: document.getElementById('opponentStatus'), 
-        opponentJobImage: document.getElementById('opponentJobImage'),
-        opponentCurrentSkill: document.getElementById('opponentCurrentSkill'), 
-        roundInfoDisplay: document.getElementById('roundInfo'),
-        nextRoundButton: document.getElementById('nextRoundButton'),
-        battleLog: document.getElementById('battleLog'),
-        gameOverModal: document.getElementById('gameOverModal'),
-        gameOverTitle: document.getElementById('gameOverTitle'),
-        gameOverMessage: document.getElementById('gameOverMessage'),
-        gameOverSkillInfo: document.getElementById('gameOverSkillInfo'),
-        restartGameButton: document.getElementById('restartGameButton'),
-        upkeepWarningModal: document.getElementById('upkeepWarningModal'),
-        upkeepWarningText: document.getElementById('upkeepWarningText'),
-        confirmProceedButton: document.getElementById('confirmProceedButton'),
-        cancelProceedButton: document.getElementById('cancelProceedButton'),
-        autoProceedToggle: document.getElementById('autoProceedToggle'),
-        autoProceedStatus: document.getElementById('autoProceedStatus'),
-        playerSkillDescription: document.getElementById('playerSkillDescription'), 
-        opponentSkillDescription: document.getElementById('opponentSkillDescription'), 
-        skillSetNameModal: document.getElementById('skillSetNameModal'), 
-        skillSetNameInput: document.getElementById('skillSetNameInput'),
-        confirmSaveSkillSetNameButton: document.getElementById('confirmSaveSkillSetNameButton'),
-        cancelSaveSkillSetNameButton: document.getElementById('cancelSaveSkillSetNameButton'),
+            skillManagementScreen: document.getElementById('skillManagementScreen'), 
+            skillSetSlotsContainer: document.getElementById('skillSetSlotsContainer'), 
+            saveCurrentSkillsButton: document.getElementById('saveCurrentSkillsButton'), 
+            startMatchButton: document.getElementById('startMatchButton'), 
+            editCurrentSkillSetButton: document.getElementById('editCurrentSkillSetButton'), 
+            currentPlayerNameDisplay_manage: document.getElementById('currentPlayerNameDisplay_manage'), 
+
+            battleScreen: document.getElementById('battleScreen'),
+            playerNameDisplay: document.getElementById('playerNameDisplay'),
+            playerHp: document.getElementById('playerHp'),
+            playerMaxHp: document.getElementById('playerMaxHp'),
+            playerHpBar: document.getElementById('playerHpBar'),
+            playerStatus: document.getElementById('playerStatus'), 
+            playerJobImage: document.getElementById('playerJobImage'),
+            playerCurrentSkill: document.getElementById('playerCurrentSkill'), 
+            opponentNameDisplay: document.getElementById('opponentNameDisplay'),
+            opponentHp: document.getElementById('opponentHp'), 
+            opponentMaxHp: document.getElementById('opponentMaxHp'), 
+            opponentHpBar: document.getElementById('opponentHpBar'),
+            opponentStatus: document.getElementById('opponentStatus'), 
+            opponentJobImage: document.getElementById('opponentJobImage'),
+            opponentCurrentSkill: document.getElementById('opponentCurrentSkill'), 
+            roundInfoDisplay: document.getElementById('roundInfo'),
+            nextRoundButton: document.getElementById('nextRoundButton'),
+            battleLog: document.getElementById('battleLog'),
+            gameOverModal: document.getElementById('gameOverModal'),
+            gameOverTitle: document.getElementById('gameOverTitle'),
+            gameOverMessage: document.getElementById('gameOverMessage'),
+            gameOverSkillInfo: document.getElementById('gameOverSkillInfo'),
+            restartGameButton: document.getElementById('restartGameButton'),
+            upkeepWarningModal: document.getElementById('upkeepWarningModal'),
+            upkeepWarningText: document.getElementById('upkeepWarningText'),
+            confirmProceedButton: document.getElementById('confirmProceedButton'),
+            cancelProceedButton: document.getElementById('cancelProceedButton'),
+            autoProceedToggle: document.getElementById('autoProceedToggle'),
+            autoProceedStatus: document.getElementById('autoProceedStatus'),
+            playerSkillDescription: document.getElementById('playerSkillDescription'), 
+            opponentSkillDescription: document.getElementById('opponentSkillDescription'), 
+            skillSetNameModal: document.getElementById('skillSetNameModal'), 
+            skillSetNameInput: document.getElementById('skillSetNameInput'),
+            confirmSaveSkillSetNameButton: document.getElementById('confirmSaveSkillSetNameButton'),
+            cancelSaveSkillSetNameButton: document.getElementById('cancelSaveSkillSetNameButton'),
+        };
+        console.log('UI Elements initialized:', this.elements);
+        console.log('nextRoundButton in UIManager.elements:', this.elements.nextRoundButton);
+        console.log('autoProceedToggle in UIManager.elements:', this.elements.autoProceedToggle);
     },
 
     showScreen(screenElement) {
@@ -105,17 +112,64 @@ const UIManager = {
         
         let statusText = "정상";
         const effectsToShow = [];
-        targetPlayer.buffs.forEach(b => effectsToShow.push(`${GameData.allSkills[b.skillKey]?.name || b.type}(${b.duration}턴)`));
-        targetPlayer.debuffs.forEach(d => effectsToShow.push(`${GameData.allSkills[d.skillKey]?.name || d.type}(${d.duration}턴)`));
-        targetPlayer.statusEffects.forEach(s => {
-            let effectName = s.type.toUpperCase();
-            if (s.type === 'polymorph') effectName = "양 변이";
-            effectsToShow.push(`${effectName}(${s.duration}턴)`);
-        });
-        if (effectsToShow.length > 0) statusText = effectsToShow.join(', ');
+        const statusEffectsData = [];
+
+        targetPlayer.buffs.forEach(b => effectsToShow.push({ type: b.type, name: GameData.allSkills[b.skillKey]?.name || b.type, duration: b.duration, isBuff: true }));
+        targetPlayer.debuffs.forEach(d => effectsToShow.push({ type: d.type, name: GameData.allSkills[d.skillKey]?.name || d.type, duration: d.duration, isBuff: false }));
+        targetPlayer.statusEffects.forEach(s => effectsToShow.push({ type: s.type, name: s.type, duration: s.duration, isStatus: true }));
+
+        if (effectsToShow.length > 0) {
+            statusText = effectsToShow.map(effect => {
+                let name = effect.name;
+                let duration = `${effect.duration}턴`;
+                let colorClass = 'text-gray-400'; // 기본 색상
+                let prefix = '';
+                let suffix = '';
+
+                if (effect.isBuff) {
+                    colorClass = 'text-green-400'; // 버프 색상
+                } else if (effect.isStatus) {
+                    // 상태 이상 종류별 색상 및 아이콘
+                    switch(effect.type) {
+                        case 'bleed': 
+                            colorClass = 'text-pink-400'; // 출혈: 핑크
+                            break;
+                        case 'poison': 
+                            colorClass = 'text-lime-400'; // 독: 연두색 계열
+                            break;
+                        case 'stun': // 기절
+                        case 'paralysis': // 마비
+                            colorClass = 'text-yellow-400'; // 마비/기절: 노랑
+                            prefix = '⚡ '; // 마비/기절 아이콘 (번개)
+                            suffix = ' ⚡';
+                            break;
+                        case 'polymorph': // 양 변이
+                            name = '양 변이';
+                            colorClass = 'text-purple-400'; // 양 변이: 보라
+                            break;
+                        case 'silence': // 침묵
+                            colorClass = 'text-orange-400'; // 침묵: 주황
+                            break;
+                        case 'blind': // 실명
+                            colorClass = 'text-gray-500'; // 실명: 어두운 회색
+                            break;
+                        // 기타 상태 이상 기본 색상 유지 또는 추가 정의
+                        default:
+                             colorClass = 'text-red-400'; // 디버프/상태 이상 기본 빨강
+                             break;
+                    }
+                } else { // 일반 디버프
+                     colorClass = 'text-red-400'; // 일반 디버프: 빨강
+                }
+
+                return `<span class="${colorClass}">${prefix}${name}(${duration})${suffix}</span>`;
+            }).join(', ');
+        } else {
+            statusText = `<span class="text-gray-400">정상</span>`; // 정상 상태도 색상 적용
+        }
         
         const statusEl = this.elements[`${prefix}Status`];
-        if (statusEl) statusEl.textContent = `상태: ${statusText}`;
+        if (statusEl) statusEl.innerHTML = `상태: ${statusText}`;
     },
 
     logToBattleLog(message, type = 'info') {
@@ -269,13 +323,23 @@ const UIManager = {
                     </div>`;
                 slotEl.addEventListener('click', (e) => {
                     if (!e.target.closest('button')) { 
-                        GameController.activateAndStartMatch(i);
+                        GameController.activeSkillSetIndex = i; // 명시적으로 갱신
+                        GameController.activateSkillSet(i, true); // 선택/활성화만!
+                        // 매칭 시작 버튼 활성화
+                        if (UIManager.elements.startMatchButton) {
+                            UIManager.elements.startMatchButton.disabled = false;
+                            UIManager.elements.startMatchButton.classList.remove('disabled-button', 'bg-gray-400');
+                            UIManager.elements.startMatchButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                        }
+                        UIManager.renderSkillSetSlots(skillSets, i);
                     }
                 });
-
             } else {
                 slotBaseClasses += 'border-gray-500 hover:border-green-500 bg-gray-600';
-                slotEl.addEventListener('click', () => GameController.handleEmptySlotClick(i));
+                slotEl.addEventListener('click', () => {
+                    console.log(`빈 슬롯 ${i + 1} 클릭됨`);
+                    GameController.handleEmptySlotClick(i);
+                });
             }
 
             if (i === activeSlotIndex && set) { 
@@ -368,5 +432,105 @@ const UIManager = {
     hideGameOverModal() {
         this.elements.gameOverModal.classList.add('hidden');
         this.elements.gameOverModal.classList.remove('flex');
-    }
+    },
+
+    updateSkillSetPreview(skillSets, activeSlotIndex = null) {
+        const container = document.getElementById('skillSetSlotsContainer');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const safeSkillSets = Array.isArray(skillSets) ? skillSets : Array(GameConfig.MAX_SKILL_SETS).fill(null);
+        
+        safeSkillSets.forEach((skillSet, index) => {
+            const slotElement = document.createElement('div');
+            let slotClass = 'bg-gray-600 p-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-500 transition-all mb-2';
+            if (activeSlotIndex === index) {
+                slotClass += ' border-4 border-indigo-400 ring-2 ring-indigo-300';
+            }
+            slotElement.className = slotClass;
+            
+            if (skillSet && Array.isArray(skillSet.skills)) {
+                slotElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-semibold text-indigo-300">${skillSet.name || `세팅 ${index + 1}`}</h3>
+                        <div class="flex space-x-2">
+                            <button class="edit-skill-set bg-yellow-500 hover:bg-yellow-600 text-black text-xs px-2 py-1 rounded" data-index="${index}">수정</button>
+                            <button class="delete-skill-set bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded" data-index="${index}">삭제</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1">
+                        ${skillSet.skills.map(skillKey => {
+                            const skillName = skillKey && GameData.allSkills[skillKey] ? GameData.allSkills[skillKey].name : '-';
+                            return `<div class="bg-gray-700 p-1 rounded text-xs text-center">${skillName}</div>`;
+                        }).join('')}
+                    </div>
+                `;
+
+                // 수정 버튼 이벤트
+                slotElement.querySelector('.edit-skill-set')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    GameController.editSkillSet(index);
+                });
+
+                // 삭제 버튼 이벤트
+                slotElement.querySelector('.delete-skill-set')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    GameController.deleteSkillSet(index);
+                });
+
+                // 전체 슬롯 클릭 이벤트 (활성화 및 시작 버튼 활성화)
+                slotElement.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        GameController.activeSkillSetIndex = index; // 명시적으로 갱신
+                        GameController.activateSkillSet(index, true); // 선택/활성화만!
+                        // 매칭 시작 버튼 활성화
+                        if (UIManager.elements.startMatchButton) {
+                            UIManager.elements.startMatchButton.disabled = false;
+                            UIManager.elements.startMatchButton.classList.remove('disabled-button', 'bg-gray-400');
+                            UIManager.elements.startMatchButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                        }
+                        // 레이아웃 유지를 위해 updateSkillSetPreview를 다시 호출
+                        UIManager.updateSkillSetPreview(skillSets, index);
+                    }
+                });
+            } else {
+                slotElement.innerHTML = `
+                    <div class="text-center">
+                        <h3 class="text-sm font-semibold text-gray-400 mb-2">빈 슬롯 ${index + 1}</h3>
+                        <p class="text-xs text-gray-500">클릭하여 새 세팅 만들기</p>
+                    </div>
+                `;
+                slotElement.addEventListener('click', () => {
+                    GameController.handleEmptySlotClick(index);
+                });
+            }
+            container.appendChild(slotElement);
+        });
+        if (UIManager.elements.startMatchButton) {
+            const hasActive = typeof activeSlotIndex === 'number' && safeSkillSets[activeSlotIndex];
+            if (!hasActive) {
+                UIManager.elements.startMatchButton.disabled = true;
+                UIManager.elements.startMatchButton.classList.add('disabled-button', 'bg-gray-400');
+                UIManager.elements.startMatchButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+            }
+        }
+    },
+
+    async activateSkillSet(slotIndex, showLog = true) {
+        console.log('[activateSkillSet] 호출됨, slotIndex:', slotIndex);
+        // ... 이하 생략
+    },
+
+    async startMatch() {
+        console.log('[startMatch] 호출됨, activeSkillSetIndex:', this.activeSkillSetIndex, 'player:', this.player);
+        await this.activateSkillSet(this.activeSkillSetIndex, false);
+
+        // 임시로 조건문 주석 처리
+        // if (!this.player || !this.player.selectedSkills.some(s => s !== null)) {
+        //     UIManager.logToBattleLog("활성화된 세팅에 스킬이 없습니다.", "system");
+        //     return;
+        // }
+        console.log('[startMatch] BattleController.initializeBattle() 호출');
+        BattleController.initializeBattle();
+    },
 };

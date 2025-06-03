@@ -3,7 +3,8 @@ const GameConfig = {
     MAX_UPKEEP: 100, // 최대 Upkeep
     MAX_SKILL_SLOTS: 6, // 플레이어가 선택할 스킬 슬롯 수
     TOTAL_BATTLE_TURNS: 18, // 총 전투 턴 수 (6 skills * 3 rounds)
-    AUTO_PROCEED_DELAY: 2000, // 자동 진행 딜레이 (ms)
+    AUTO_PROCEED_DELAY: 3000, // 자동 진행 딜레이 (ms)
+    FAST_AUTO_PROCEED_DELAY: 1500, // 2배속 1.5초
     MAX_SKILL_SETS: 3, // 저장 가능한 스킬 세팅 개수
     
     IMAGE_PATH: {},
