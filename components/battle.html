@@ -1,0 +1,145 @@
+<!-- Battle Screen -->
+<div id="battleScreen" class="hidden">
+    <!-- Player Info (Left) -->
+    <div class="flex flex-col items-start w-2/5">
+        <div id="playerNameDisplay" class="font-bold text-indigo-400">플레이어</div>
+        <div id="playerLevel" class="text-gray-300">Lv. ${player.level || 1}</div>
+        <div class="flex items-center text-yellow-300"><img src="./assets/icons/coin.png" alt="Points" class="w-3 h-3 mr-0.5"> <span id="playerPoints">${player.points || 0}</span>pt</div>
+        <div class="flex items-center text-red-400"><img src="./assets/icons/sword.png" alt="Attack" class="w-3 h-3 mr-0.5"> <span id="playerAttack">${player.attack || 0}</span></div>
+        <div class="flex items-center text-green-400"><span id="playerMaxHp">${player.maxHp || 0}</span> <img src="./assets/icons/heart.png" alt="Heart" class="w-3 h-3 mr-0.5"></div>
+        <div class="flex items-center text-blue-400"><img src="./assets/icons/shield.png" alt="Defense" class="w-3 h-3 mr-0.5"> <span id="playerDefense">${player.defense || 0}</span></div>
+    </div>
+    
+    <!-- VS (Center) -->
+    <div class="flex-grow text-center text-2xl sm:text-3xl font-bold text-yellow-400">VS</div>
+
+    <!-- Opponent Info (Right) -->
+    <div class="flex flex-col items-end w-2/5">
+        <div id="opponentNameDisplay" class="font-bold text-teal-400">상대 (AI)</div>
+        <div id="opponentLevel" class="text-gray-300">Lv. ${opponent.level || 1}</div>
+        <div class="flex items-center text-yellow-300"><span id="opponentPoints">${opponent.points || 0}</span>pt <img src="./assets/icons/coin.png" alt="Points" class="w-3 h-3 ml-0.5"></div>
+        <div class="flex items-center text-red-400"><span id="opponentAttack">${opponent.attack || 0}</span> <img src="./assets/icons/sword.png" alt="Attack" class="w-3 h-3 ml-0.5"></div>
+        <div class="flex items-center text-green-400"><span id="opponentMaxHp">${opponent.maxHp || 0}</span> <img src="./assets/icons/heart.png" alt="Heart" class="w-3 h-3 ml-0.5"></div>
+        <div class="flex items-center text-blue-400"><span id="opponentDefense">${opponent.defense || 0}</span> <img src="./assets/icons/shield.png" alt="Defense" class="w-3 h-3 ml-0.5"></div>
+    </div>
+
+    <!-- HP Bars -->
+    <div class="grid grid-cols-2 gap-4 px-4 mt-2">
+        <div class="w-full bg-gray-600 rounded-full h-4 sm:h-5">
+            <div id="playerHpBar" class="bg-green-500 h-4 sm:h-5 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none hp-bar-inner" style="width: 100%"></div>
+        </div>
+        <div class="w-full bg-gray-600 rounded-full h-4 sm:h-5">
+            <div id="opponentHpBar" class="bg-green-500 h-4 sm:h-5 rounded-full text-xs font-medium text-blue-100 text-center p-0.5 leading-none hp-bar-inner" style="width: 100%"></div>
+        </div>
+    </div>
+
+    <!-- Skill Slots Area -->
+    <div id="skillSlotsArea" class="flex justify-center items-end mt-2 sm:mt-3 px-2">
+        <!-- Player Skill Area (Left) -->
+        <div class="flex flex-col items-center w-2/5 min-w-0">
+            <!-- Rage Indicators (Left) -->
+            <div class="flex space-x-1 mb-1">
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+            </div>
+            <div id="playerBattleSkills" class="grid grid-cols-3 gap-1 w-full bg-gray-700 p-1 rounded-lg shadow">
+                <!-- Player skill slots will be rendered here by JS (3x2 grid) -->
+            </div>
+            <div class="text-xs text-gray-400 mt-1">SKILL</div>
+        </div>
+        
+        <!-- Center Area (Dialogue ON / Other Controls) -->
+        <div class="flex-grow flex flex-col items-center justify-end mx-2 mb-2">
+            <div class="bg-gray-600 text-white text-xs px-2 py-1 rounded-full shadow">대화 ON</div>
+        </div>
+
+        <!-- Opponent Skill Area (Right) -->
+        <div class="flex flex-col items-center w-2/5 min-w-0">
+            <!-- Rage Indicators (Right) -->
+            <div class="flex space-x-1 mb-1">
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gray-500 border border-gray-400"></div>
+            </div>
+            <div id="opponentBattleSkills" class="grid grid-cols-3 gap-1 w-full bg-gray-700 p-1 rounded-lg shadow">
+                <!-- Opponent skill slots will be rendered here by JS (3x2 grid) -->
+            </div>
+            <div class="text-xs text-gray-400 mt-1">SKILL</div>
+        </div>
+    </div>
+
+    <!-- Character and Status Area -->
+    <div id="characterArea" class="relative flex justify-around items-start flex-grow px-4 pt-8" style="min-height: 200px;">
+        <!-- Player Character and Status (Left) -->
+        <div class="flex flex-col items-center absolute left-4 bottom-0 w-1/2 pr-2">
+            <img id="playerJobImage" src="https://placehold.co/80x80/7F00FF/FFFFFF?text=P" alt="플레이어 직업" class="mb-1 rounded-full w-16 h-16 sm:w-24 sm:h-24 border-2 border-indigo-500" loading="lazy">
+            <div class="text-xs text-gray-400 mt-1 text-center w-full">
+                <div id="playerStatus" class="mb-1">상태: 정상</div>
+                <div id="playerLevel" class="mb-1">Lv. <span id="playerLevelValue">1</span></div>
+                <div id="playerPoints" class="mb-1">Points: <span id="playerPointsValue">0</span>pt</div>
+                <div id="playerAttack" class="mb-1">Attack: <span id="playerAttackValue">0</span></div>
+                <div id="playerDefense" class="mb-1">Defense: <span id="playerDefenseValue">0</span></div>
+            </div>
+            <div id="playerCurrentSkill" class="mt-1 text-xs sm:text-sm font-semibold text-indigo-300 text-center w-full"></div>
+            <p id="playerSkillDescription" class="text-xs text-gray-300 mt-1 skill-description text-center w-full overflow-y-auto max-h-[50px]"></p>
+        </div>
+
+        <!-- Opponent Character and Status (Right) -->
+        <div class="flex flex-col items-center absolute right-4 bottom-0 w-1/2 pl-2">
+            <img id="opponentJobImage" src="https://placehold.co/80x80/008080/FFFFFF?text=AI" alt="상대 직업" class="mb-1 rounded-full w-16 h-16 sm:w-24 sm:h-24 border-2 border-teal-500" loading="lazy">
+            <div class="text-xs text-gray-400 mt-1 text-center w-full">
+                <div id="opponentStatus" class="mb-1">상태: 정상</div>
+                <div id="opponentLevel" class="mb-1">Lv. <span id="opponentLevelValue">1</span></div>
+                <div id="opponentPoints" class="mb-1">Points: <span id="opponentPointsValue">0</span>pt</div>
+                <div id="opponentAttack" class="mb-1">Attack: <span id="opponentAttackValue">0</span></div>
+                <div id="opponentDefense" class="mb-1">Defense: <span id="opponentDefenseValue">0</span></div>
+            </div>
+            <div id="opponentCurrentSkill" class="mt-1 text-xs sm:text-sm font-semibold text-teal-300 text-center w-full"></div>
+            <p id="opponentSkillDescription" class="text-xs text-gray-300 mt-1 skill-description text-center w-full overflow-y-auto max-h-[50px]"></p>
+        </div>
+    </div>
+
+    <!-- Battle Log Area -->
+    <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col mt-2 sm:mt-3 min-h-[250px]">
+        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
+        <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-600 p-1 sm:p-2 rounded-md space-y-1 text-xs" role="log" aria-label="전투 로그">
+            <!-- Battle log messages will be added here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Bottom Control Bar -->
+    <div id="battleControlBar" class="flex justify-between items-center bg-gray-800 p-2 sm:p-3 rounded-lg shadow-xl mt-2 sm:mt-3 text-white text-xs sm:text-sm">
+        <!-- Left Section (Continuous Battle Toggle/Status) -->
+        <div class="flex items-center space-x-2 w-1/3">
+            <label for="continuousBattleToggle" class="text-gray-400">연속결투:</label>
+            <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="continuousBattleToggle" id="continuousBattleToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
+                <label for="continuousBattleToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+            </div>
+        </div>
+
+        <!-- Center Section (Skeleton Animation / Speed) -->
+        <div class="flex-grow flex justify-center items-center w-1/3">
+            <img src="./assets/icons/skeleton_run.gif" alt="Running Skeleton" class="w-6 h-6 mr-2" id="skeletonAnimation">
+            <span id="battleSpeedDisplay" class="font-bold mr-2">1배속</span>
+            <span id="autoProceedStatus" class="text-xs text-gray-400 mr-2">OFF</span>
+            <!-- Speed Toggle -->
+            <label for="autoProceedToggle" class="text-xs text-gray-400 mr-1">SPEED 2X:</label>
+            <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="autoProceedToggle" id="autoProceedToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
+                <label for="autoProceedToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+            </div>
+        </div>
+
+        <!-- Right Section (Battle Log Toggle / Exit Button) -->
+        <div class="flex items-center space-x-2 w-1/3 justify-end">
+            <label for="battleLogToggle" class="text-gray-400">로그:</label>
+            <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="battleLogToggle" id="battleLogToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer" checked/>
+                <label for="battleLogToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+            </div>
+            <button id="exitBattleButton" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-1 px-2 rounded-lg shadow-md">나가기</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+<!-- Game Screen -->
+<div id="gameScreen" class="flex flex-col items-center justify-center h-full">
+    <!-- Job Selection -->
+    <div id="jobSelectionScreen" class="flex flex-col items-center justify-center h-full">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">직업 선택</h2>
+            <select id="playerJobSelect" class="w-full bg-gray-600 border border-gray-500 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 mb-4">
+                <!-- Job options will be populated by JavaScript -->
+            </select>
+            <button id="confirmJobButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                선택 완료
+            </button>
+        </div>
+    </div>
+
+    <!-- Skill Selection -->
+    <div id="skillSelectionScreen" class="hidden flex flex-col items-center justify-center h-full">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">스킬 선택</h2>
+            <div id="playerJobName" class="text-lg mb-4"></div>
+            <div id="playerAvailableSkills" class="grid grid-cols-2 gap-2 mb-4">
+                <!-- Available skills will be populated by JavaScript -->
+            </div>
+            <div id="playerSelectedSkillsContainer" class="grid grid-cols-2 gap-2 mb-4">
+                <!-- Selected skills will be populated by JavaScript -->
+            </div>
+            <div class="flex justify-between">
+                <button id="prevJobButton" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    이전
+                </button>
+                <button id="confirmSkillSetupButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    선택 완료
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Management -->
+    <div id="skillManagementScreen" class="hidden flex flex-col items-center justify-center h-full">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">스킬 세팅 관리</h2>
+            <div id="skillSetSlotsContainer" class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Skill set slots will be populated by JavaScript -->
+            </div>
+            <div class="flex justify-between">
+                <button id="saveCurrentSkillsButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    현재 스킬 저장
+                </button>
+                <button id="startMatchButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                    매칭 시작! (AI 대전)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
