@@ -1,0 +1,27 @@
+# IDE 설정 파일
+.vscode/
+.idea/
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 로그 파일
+*.log
+npm-debug.log*
+
+# 환경 설정 파일
+.env
+.env.local
+.env.*.local
+
+# 빌드 결과물
+/dist
+/build
+
+# 의존성 디렉토리
+/node_modules
+
+# 캐시 디렉토리
+.cache/
+.temp/ 
