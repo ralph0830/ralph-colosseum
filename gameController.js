@@ -137,12 +137,33 @@ const GameController = {
         console.log('[startMatch] playerSkillSets:', GameController.playerSkillSets);
         
         try {
-            if (GameController.activeSkillSetIndex === null || !GameController.playerSkillSets[GameController.activeSkillSetIndex]) {
-                UIManager.logToBattleLog("매칭을 시작하려면 먼저 사용할 스킬 세팅을 선택해주세요.", "system");
+            // 스킬셋이 선택되지 않은 경우, 첫 번째 유효한 스킬셋을 자동 선택
+            if (GameController.activeSkillSetIndex === null) {
+                const validSkillSetIndex = GameController.playerSkillSets.findIndex(set => 
+                    set && set.skills && set.skills.some(s => s !== null)
+                );
+                
+                if (validSkillSetIndex === -1) {
+                    UIManager.logToBattleLog("사용 가능한 스킬 세팅이 없습니다.", "system");
+                    return;
+                }
+                
+                GameController.activeSkillSetIndex = validSkillSetIndex;
+                console.log('[startMatch] 자동 선택된 스킬셋 인덱스:', validSkillSetIndex);
+            }
+
+            const skillSet = GameController.playerSkillSets[GameController.activeSkillSetIndex];
+            if (!skillSet || !skillSet.skills || !skillSet.skills.some(s => s !== null)) {
+                UIManager.logToBattleLog("선택한 스킬 세팅에 유효한 스킬이 없습니다.", "system");
                 return;
             }
             
-            await GameController.activateSkillSet(GameController.activeSkillSetIndex, false);
+            const success = await GameController.activateSkillSet(GameController.activeSkillSetIndex, false);
+            if (!success) {
+                UIManager.logToBattleLog("스킬 세팅 활성화에 실패했습니다.", "system");
+                return;
+            }
+
             console.log('[startMatch] player:', GameController.player);
             console.log('[startMatch] selectedSkills:', GameController.player.selectedSkills);
 
@@ -246,43 +267,54 @@ const GameController = {
     activateSkillSet(slotIndex, showLog = true) {
         try {
             if (!GameController.currentUser) return;
-            const setToActivate = GameController.playerSkillSets[slotIndex]; 
-
-            if (setToActivate && GameData.jobs[setToActivate.jobKey]?.isActive) {
-                const playerName = GameController.currentUser?.displayName || GameController.currentUser?.email?.split('@')[0] || "플레이어";
-                GameController.player = new Player(0, playerName, setToActivate.jobKey, false);
-                
-                GameController.player.selectedSkills = Array(GameConfig.MAX_SKILL_SLOTS).fill(null);
-                let currentUpkeep = 0;
-                if (setToActivate.skills && Array.isArray(setToActivate.skills)) {
-                    setToActivate.skills.forEach((skillKey, index) => {
-                        if (index < GameConfig.MAX_SKILL_SLOTS && skillKey && GameData.allSkills[skillKey]) {
-                            const skill = GameData.allSkills[skillKey];
-                            GameController.player.selectedSkills[index] = { skillKey: skillKey, originalUpkeep: skill.upkeep };
-                            currentUpkeep += skill.upkeep;
-                        } else {
-                            GameController.player.selectedSkills[index] = null;
-                        }
-                    });
-                }
-                GameController.player.currentUpkeep = currentUpkeep;
-                GameController.selectedPlayerJobKey = setToActivate.jobKey; 
-                GameController.player.activeSkillSetId = setToActivate.id; 
-                GameController.activeSkillSetIndex = slotIndex;
-
-                // 디버깅 로그
-                console.log('[activateSkillSet] player:', GameController.player);
-                console.log('[activateSkillSet] selectedSkills:', GameController.player.selectedSkills);
-
-                if (showLog) UIManager.logToBattleLog(`"${setToActivate.name}" 세팅이 활성화되었습니다.`, "system");
-                // UIManager.renderSkillSetSlots(GameController.playerSkillSets, slotIndex); // 화면 갱신은 loadUserSkillSets에서 처리
-
-                console.log('[activateSkillSet] selectedSkills:', JSON.stringify(GameController.player.selectedSkills));
-            } else {
-                if (showLog) UIManager.logToBattleLog("선택한 스킬 세팅을 불러올 수 없거나, 해당 직업이 비활성화 상태입니다.", "system");
+            const setToActivate = GameController.playerSkillSets[slotIndex];
+            
+            if (!setToActivate) {
+                console.error('활성화할 스킬 세트가 없습니다:', slotIndex);
+                return;
             }
-        } catch (e) {
-            console.error(e);
+
+            console.log('[activateSkillSet] player:', GameController.player);
+            console.log('[activateSkillSet] selectedSkills:', setToActivate.skills);
+
+            // 플레이어가 없으면 새로 생성
+            if (!GameController.player) {
+                const playerName = GameController.currentUser.displayName || GameController.currentUser.email.split('@')[0];
+                GameController.player = new Player(0, playerName, setToActivate.jobKey, false);
+            } else {
+                // 기존 플레이어가 있으면 HP 초기화
+                GameController.player.hp = GameController.player.maxHp;
+                GameController.player.currentUpkeep = 0;
+                GameController.player.status = [];
+                GameController.player.jobKey = setToActivate.jobKey;
+                GameController.player.jobData = GameData.jobs[setToActivate.jobKey];
+            }
+
+            // 스킬 세트 활성화
+            GameController.player.selectedSkills = setToActivate.skills.map(skillKey => {
+                if (!skillKey) return null;
+                const skillData = GameData.allSkills[skillKey];
+                if (!skillData) {
+                    console.error(`스킬을 찾을 수 없습니다: ${skillKey}`);
+                    return null;
+                }
+                return {
+                    skillKey: skillKey,
+                    originalUpkeep: skillData.upkeep
+                };
+            });
+
+            GameController.activeSkillSetIndex = slotIndex;
+            console.log('[activateSkillSet] selectedSkills:', GameController.player.selectedSkills);
+
+            if (showLog) {
+                UIManager.logToBattleLog(`"${setToActivate.name}" 스킬 세팅이 활성화되었습니다.`, "system");
+            }
+
+            return true;
+        } catch (error) {
+            console.error('스킬 세트 활성화 중 오류:', error);
+            return false;
         }
     },
     
@@ -347,12 +379,11 @@ const GameController = {
 
     resetGame() {
         console.log('[GameController.resetGame] 진입');
-        // 게임 상태 초기화
-        this.player = null;
+        // 게임 상태 초기화 (스킬셋은 유지)
         this.opponent = null;
         this.selectedPlayerJobKey = null;
         this.currentSkillSetSlotToSave = null;
-        this.activeSkillSetIndex = null;
+        
         // UI를 대전 준비 화면으로 전환
         UIManager.showScreen(UIManager.elements.skillManagementScreen);
         // 배틀 로그 초기화

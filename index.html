@@ -11,6 +11,45 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <style>
+        /* 꽃가루 이펙트 스타일 */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        @keyframes confetti-shake {
+            0% {
+                transform: translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+            50% {
+                transform: translateX(5px) rotate(5deg);
+            }
+            75% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+            100% {
+                transform: translateX(0) rotate(0deg);
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="game-container p-3 sm:p-4">
@@ -70,14 +109,14 @@
                 
                 <div class="flex-grow text-center">
                      <button id="nextRoundButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 sm:py-1.5 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm inline-block">다음 턴</button>
-                </div>
+            </div>
 
                 <div class="flex items-center space-x-1 sm:space-x-2"> 
                     <label for="autoProceedToggle" class="text-xs text-gray-400">SPEED 2X:</label>
                     <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
                         <input type="checkbox" name="autoProceedToggle" id="autoProceedToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
                         <label for="autoProceedToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
-                    </div>
+                 </div>
                     <span id="autoProceedStatus" class="text-xs text-indigo-400 w-8 text-center">OFF</span>
                 </div>
             </div>
@@ -94,7 +133,7 @@
                     <div id="playerCurrentSkill" class="mt-1 text-xs sm:text-sm font-semibold text-indigo-300 min-h-[18px] sm:min-h-[20px]"></div>
                     <p id="playerSkillDescription" class="text-xs text-gray-300 mt-1 skill-description min-h-[30px]"></p>
                 </div>
-
+                
                 <div class="player-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl text-center">
                     <h2 id="opponentNameDisplay" class="text-sm sm:text-lg font-semibold mb-1 text-teal-400">상대 (AI)</h2>
                     <img id="opponentJobImage" src="https://placehold.co/80x80/008080/FFFFFF?text=AI" alt="상대 직업" class="mx-auto mb-1 rounded-full w-12 h-12 sm:w-16 sm:h-16 border-2 border-teal-500" loading="lazy">
@@ -107,14 +146,85 @@
                     <p id="opponentSkillDescription" class="text-xs text-gray-300 mt-1 skill-description min-h-[30px]"></p>
                 </div>
             </div>
-            
-            <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col min-h-[300px]"> 
-                <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
-                <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-600 p-1 sm:p-2 rounded-md space-y-1 text-xs" role="log" aria-label="전투 로그">
+
+            <div class="flex-grow flex flex-col">
+                <!-- 전투 로그 영역 (기본적으로 숨김) -->
+                <div id="battleLogContainer" class="hidden flex-grow">
+                    <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col min-h-[300px]"> 
+                        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
+                        <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-600 p-1 sm:p-2 rounded-md space-y-1 text-xs" role="log" aria-label="전투 로그">
+                        </div>
                     </div>
+                </div>
+
+                <!-- 스킬 표시 영역 -->
+                <div class="mt-2 sm:mt-3">
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- 플레이어 스킬 영역 -->
+                        <div class="bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl">
+                            <h3 class="text-sm font-semibold text-indigo-300 mb-2">플레이어 스킬</h3>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div id="playerBattleSkill1" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 1</div>
+                                </div>
+                                <div id="playerBattleSkill2" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 2</div>
+                                </div>
+                                <div id="playerBattleSkill3" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 3</div>
+                                </div>
+                                <div id="playerBattleSkill4" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 4</div>
+                                </div>
+                                <div id="playerBattleSkill5" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 5</div>
+                                </div>
+                                <div id="playerBattleSkill6" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 6</div>
+                                </div>
+                     </div>
+             </div>
+
+                        <!-- 상대방 스킬 영역 -->
+                        <div class="bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl">
+                            <h3 class="text-sm font-semibold text-teal-300 mb-2">상대방 스킬</h3>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div id="opponentBattleSkill1" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 1</div>
+                                </div>
+                                <div id="opponentBattleSkill2" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 2</div>
+                                </div>
+                                <div id="opponentBattleSkill3" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 3</div>
+                                </div>
+                                <div id="opponentBattleSkill4" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 4</div>
+                                </div>
+                                <div id="opponentBattleSkill5" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 5</div>
+                                </div>
+                                <div id="opponentBattleSkill6" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
+                                    <div class="text-xs font-semibold text-white">스킬 6</div>
+                                </div>
+                      </div>
+                   </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- 전투 로그 토글 버튼 -->
+            <div class="fixed bottom-4 right-4 z-50 bg-gray-700 p-2 rounded-lg shadow-xl flex items-center space-x-2">
+                <label for="battleLogToggle" class="text-xs text-gray-400">전투 로그:</label>
+                   <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="battleLogToggle" id="battleLogToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
+                       <label for="battleLogToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+                   </div>
+                <span id="battleLogStatus" class="text-xs text-indigo-400 w-8 text-center">OFF</span>
+               </div>
         </div>
-        
+
         <div id="gameOverModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">
             <div class="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-2xl text-center max-w-xs w-full">
                 <h2 id="gameOverTitle" class="text-2xl sm:text-3xl font-bold mb-3 text-yellow-400">게임 종료!</h2>
@@ -149,7 +259,7 @@
     </div>
 
     <script src="gameConfig.js"></script>
-    <script src="gameData.js"></script>
+    <script src="gameData.js"></script> 
     
     <script src="firebaseService.js"></script> 
     <script src="authManager.js"></script>
@@ -161,7 +271,7 @@
     <script src="battleController.js"></script>
     <script src="gameController.js"></script>
     <script src="eventHandler.js"></script>
-    
+
     <script>
         // Firebase 초기화 확인
         document.addEventListener('DOMContentLoaded', function() {
@@ -172,6 +282,36 @@
                 console.error('Firebase SDK not loaded');
             }
         });
+    </script> 
+    <script>
+        // 꽃가루 이펙트 함수
+        function createConfetti() {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(confetti);
+            }
+
+            // 5초 후에 꽃가루 제거
+            setTimeout(() => {
+                container.remove();
+            }, 5000);
+        }
     </script>
     <script src="main.js"></script> 
 </body>

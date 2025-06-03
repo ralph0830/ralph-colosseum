@@ -66,10 +66,33 @@ const UIManager = {
             skillSetNameInput: document.getElementById('skillSetNameInput'),
             confirmSaveSkillSetNameButton: document.getElementById('confirmSaveSkillSetNameButton'),
             cancelSaveSkillSetNameButton: document.getElementById('cancelSaveSkillSetNameButton'),
+            battleLogToggle: document.getElementById('battleLogToggle'),
+            battleLogStatus: document.getElementById('battleLogStatus'),
+            battleLogContainer: document.getElementById('battleLogContainer'),
+            playerBattleSkills: Array.from({length: 6}, (_, i) => document.getElementById(`playerBattleSkill${i + 1}`)),
+            opponentBattleSkills: Array.from({length: 6}, (_, i) => document.getElementById(`opponentBattleSkill${i + 1}`)),
         };
         console.log('UI Elements initialized:', this.elements);
         console.log('nextRoundButton in UIManager.elements:', this.elements.nextRoundButton);
         console.log('autoProceedToggle in UIManager.elements:', this.elements.autoProceedToggle);
+        // 전투 로그 관련 요소 초기화
+        if (this.elements.battleLogContainer) {
+            this.elements.battleLogContainer.classList.add('hidden');
+            if (this.elements.battleLogStatus) {
+                this.elements.battleLogStatus.textContent = 'OFF';
+            }
+        }
+    },
+
+    initializeEventListeners() {
+        // 전투 로그 토글 이벤트
+        if (this.elements.battleLogToggle) {
+            this.elements.battleLogToggle.addEventListener('change', (e) => {
+                const isVisible = e.target.checked;
+                this.elements.battleLogContainer.classList.toggle('hidden', !isVisible);
+                this.elements.battleLogStatus.textContent = isVisible ? 'ON' : 'OFF';
+            });
+        }
     },
 
     showScreen(screenElement) {
@@ -532,5 +555,97 @@ const UIManager = {
         // }
         console.log('[startMatch] BattleController.initializeBattle() 호출');
         BattleController.initializeBattle();
+    },
+
+    updateBattleSkills() {
+        // 플레이어 스킬 업데이트
+        if (this.elements.playerBattleSkills && GameController.player) {
+            GameController.player.selectedSkills.forEach((skill, index) => {
+                const skillElement = this.elements.playerBattleSkills[index];
+                if (!skillElement) return;
+
+                if (skill && skill.skillKey) { // skill.skillKey가 있는지 확인
+                    const skillData = GameData.allSkills[skill.skillKey];
+                    if (skillData) {
+                        skillElement.innerHTML = `
+                            <div class="text-xs font-semibold text-white">${skillData.name}</div>
+                         `;
+                        skillElement.classList.remove('bg-gray-600');
+                        skillElement.classList.add('bg-gray-500');
+                    } else { // skillKey는 있지만 GameData에 없는 경우
+                        skillElement.innerHTML = `
+                            <div class="text-xs font-semibold text-gray-400">알 수 없음</div>
+                         `;
+                         skillElement.classList.remove('bg-gray-600');
+                         skillElement.classList.add('bg-gray-500');
+                         console.warn(`GameData에 없는 스킬 키: ${skill.skillKey}`);
+                    }
+                } else { // skill 객체가 없거나 skillKey가 없는 경우
+                    skillElement.innerHTML = `
+                        <div class="text-xs font-semibold text-white">스킬 ${index + 1}</div>
+                     `;
+                    skillElement.classList.remove('bg-gray-500');
+                    skillElement.classList.add('bg-gray-600');
+                }
+            });
+        }
+
+        // 상대방 스킬 업데이트
+        if (this.elements.opponentBattleSkills && GameController.opponent) {
+            console.log('상대방 스킬 업데이트 시작', GameController.opponent.selectedSkills);
+            GameController.opponent.selectedSkills.forEach((skillData, index) => { // skillData 객체로 받음
+                const skillElement = this.elements.opponentBattleSkills[index];
+                if (!skillElement) return;
+
+                if (skillData && skillData.skillKey) { // skillData.skillKey가 있는지 확인
+                     const skill = GameData.allSkills[skillData.skillKey]; // skill 객체 가져옴
+                    if (skill) {
+                        skillElement.innerHTML = `
+                            <div class="text-xs font-semibold text-white">${skill.name}</div>
+                         `;
+                        skillElement.classList.remove('bg-gray-600');
+                        skillElement.classList.add('bg-gray-500');
+                    } else { // skillKey는 있지만 GameData에 없는 경우
+                         skillElement.innerHTML = `
+                            <div class="text-xs font-semibold text-gray-400">알 수 없음</div>
+                         `;
+                         skillElement.classList.remove('bg-gray-600');
+                         skillElement.classList.add('bg-gray-500');
+                         console.warn(`GameData에 없는 상대방 스킬 키: ${skillData.skillKey}`);
+                    }
+                } else { // skillData 객체가 없거나 skillData.skillKey가 없는 경우
+                    skillElement.innerHTML = `
+                        <div class="text-xs font-semibold text-white">스킬 ${index + 1}</div>
+                     `;
+                    skillElement.classList.remove('bg-gray-500');
+                    skillElement.classList.add('bg-gray-600');
+                }
+            });
+             console.log('상대방 스킬 업데이트 완료');
+        }
+    },
+
+    highlightCurrentSkills(playerSkillIndex, opponentSkillIndex) {
+        // 플레이어 스킬 하이라이트
+        if (this.elements.playerBattleSkills) {
+            this.elements.playerBattleSkills.forEach((skillElement, i) => {
+                if (i === playerSkillIndex) {
+                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-400', 'animate-pulse');
+                } else {
+                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-400', 'animate-pulse');
+                }
+            });
+        }
+
+        // 상대방 스킬 하이라이트
+        if (this.elements.opponentBattleSkills) {
+            this.elements.opponentBattleSkills.forEach((skillElement, i) => {
+                if (i === opponentSkillIndex) {
+                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-teal-400', 'animate-pulse');
+                } else {
+                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-teal-400', 'animate-pulse');
+                }
+            });
+        }
     },
 };

@@ -178,6 +178,9 @@ body {
 /* 전투 로그 영역 스크롤 및 크기 */
 .battle-log-area {
     max-height: 250px; /* 전투 로그창 최대 높이 증가 */
+    background-color: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
 }
 @media (min-height: 701px) {
     .battle-log-area { max-height: 320px; } /* 더 큰 화면에서 더 크게 */
@@ -200,5 +203,10 @@ body {
 /* 스위치 핸들 스타일 */
 .toggle-checkbox {
     transition: transform 0.2s ease-in-out;
+}
+
+/* 전투 로그 토글 버튼 컨테이너 (임시 스타일) */
+.fixed.bottom-4.right-4 {
+    border: 3px solid red !important; /* 임시 빨간 테두리 */
 }
 

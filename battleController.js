@@ -7,46 +7,65 @@ const BattleController = {
     lastOpponentSkillUsed: null,
     isProcessingRound: false,
 
-    initializeBattle() {
-        const availableAIProfiles = GameData.aiCharacters.filter(ai => GameData.jobs[ai.jobKey].isActive);
-        let randomAIProfile;
-        if (availableAIProfiles.length > 0) {
-            randomAIProfile = availableAIProfiles[Math.floor(Math.random() * availableAIProfiles.length)];
-        } else { 
-            console.warn("선택 가능한 활성 AI 프로필이 없어 기본 전사 AI를 사용합니다.");
-            randomAIProfile = GameData.aiCharacters.find(ai => ai.jobKey === 'warrior') || GameData.aiCharacters[0];
-             if (!randomAIProfile) {
-                console.error("AI 프로필을 찾을 수 없습니다! 게임을 시작할 수 없습니다.");
-                UIManager.logToBattleLog("오류: AI 상대를 찾을 수 없습니다.", "system");
-                GameController.resetGame(); // 또는 다른 오류 처리
+    async initializeBattle() {
+        try {
+            console.log('[BattleController.initializeBattle] 진입');
+            if (!GameController.player || !GameController.player.selectedSkills.some(s => s !== null)) {
+                console.error('플레이어 또는 스킬이 없습니다.');
                 return;
             }
-        }
 
-        GameController.opponent = new Player(1, randomAIProfile.name, randomAIProfile.jobKey, true);
-        GameController.opponent.selectAISkills(); 
+            // 전투 화면 표시
+            UIManager.showScreen(UIManager.elements.battleScreen);
+            
+            // 전투 로그 초기화
+            if (UIManager.elements.battleLog) {
+                UIManager.elements.battleLog.innerHTML = '';
+            }
 
-        UIManager.showScreen(UIManager.elements.battleScreen);
-        
-        UIManager.updateBattlePlayerUI(GameController.player);
-        UIManager.updateBattlePlayerUI(GameController.opponent);
-        
-        this.currentBattleTurn = 1;
-        UIManager.elements.battleLog.innerHTML = ''; 
-        UIManager.logToBattleLog("전투 시작! AI: " + GameController.opponent.name + " (" + GameController.opponent.jobData.name + ")", "system");
-        this.updateBattleScreenRoundUI();
-        // 다음 턴 버튼은 수동 진행 모드에서만 필요 (강제 자동 모드에서는 제거)
-        if (UIManager.elements.nextRoundButton) {
-             UIManager.elements.nextRoundButton.style.display = 'none'; // 버튼 숨김
+            // 스킬 표시 업데이트
+            UIManager.updateBattleSkills(GameController.player.selectedSkills);
+
+            const availableAIProfiles = GameData.aiCharacters.filter(ai => GameData.jobs[ai.jobKey].isActive);
+            let randomAIProfile;
+            if (availableAIProfiles.length > 0) {
+                randomAIProfile = availableAIProfiles[Math.floor(Math.random() * availableAIProfiles.length)];
+            } else { 
+                console.warn("선택 가능한 활성 AI 프로필이 없어 기본 전사 AI를 사용합니다.");
+                randomAIProfile = GameData.aiCharacters.find(ai => ai.jobKey === 'warrior') || GameData.aiCharacters[0];
+                 if (!randomAIProfile) {
+                    console.error("AI 프로필을 찾을 수 없습니다! 게임을 시작할 수 없습니다.");
+                    UIManager.logToBattleLog("오류: AI 상대를 찾을 수 없습니다.", "system");
+                    GameController.resetGame(); // 또는 다른 오류 처리
+                    return;
+                }
+            }
+
+            GameController.opponent = new Player(1, randomAIProfile.name, randomAIProfile.jobKey, true);
+            GameController.opponent.selectAISkills(); 
+
+            UIManager.updateBattlePlayerUI(GameController.player);
+            UIManager.updateBattlePlayerUI(GameController.opponent);
+            UIManager.updateBattleSkills(); // 상대방 스킬도 업데이트
+            
+            this.currentBattleTurn = 1;
+            UIManager.logToBattleLog("전투 시작! AI: " + GameController.opponent.name + " (" + GameController.opponent.jobData.name + ")", "system");
+            this.updateBattleScreenRoundUI();
+            // 다음 턴 버튼은 수동 진행 모드에서만 필요 (강제 자동 모드에서는 제거)
+            if (UIManager.elements.nextRoundButton) {
+                 UIManager.elements.nextRoundButton.style.display = 'none'; // 버튼 숨김
+            }
+            
+            // 강제 자동 진행 시작
+            this.isAutoProceedEnabled = true;
+            if (UIManager.elements.autoProceedToggle) {
+                UIManager.elements.autoProceedToggle.checked = this.isAutoProceedEnabled;
+                UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
+            }
+            this.startAutoProceed();
+        } catch (error) {
+            console.error('전투 초기화 중 오류:', error);
         }
-        
-        // 강제 자동 진행 시작
-        this.isAutoProceedEnabled = true;
-        if (UIManager.elements.autoProceedToggle) {
-            UIManager.elements.autoProceedToggle.checked = this.isAutoProceedEnabled;
-            UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
-        }
-        this.startAutoProceed();
     },
 
     updateBattleScreenRoundUI() {
@@ -57,6 +76,9 @@ const BattleController = {
 
         const playerSkillData = GameController.player.selectedSkills[playerSkillIndex];
         const opponentSkillData = GameController.opponent.selectedSkills[opponentSkillIndex];
+
+        // 현재 턴의 스킬 하이라이트
+        UIManager.highlightCurrentSkills(playerSkillIndex, opponentSkillIndex);
 
         UIManager.displayCurrentRoundSkill(GameController.player, 
             playerSkillData ? GameData.allSkills[playerSkillData.skillKey].name : "스킬 없음",
@@ -252,9 +274,25 @@ const BattleController = {
     },
 
     endBattle(winner) { 
-        // 다음 턴 버튼 비활성화 로직 제거 (숨겨져 있으므로)
-        // UIManager.elements.nextRoundButton.disabled = true;
         this.stopAutoProceed(); 
         UIManager.showGameOverModal(winner, this.lastPlayerSkillUsed, this.lastOpponentSkillUsed);
+        
+        // 플레이어가 승리한 경우에만 꽃가루 이펙트 실행
+        if (winner === GameController.player) {
+            createConfetti();
+        }
+    },
+
+    async executePlayerTurn() {
+        try {
+            // ... existing code ...
+            
+            // 현재 사용 중인 스킬 하이라이트
+            UIManager.highlightCurrentSkill(this.currentPlayerSkillIndex);
+            
+            // ... existing code ...
+        } catch (error) {
+            console.error('플레이어 턴 실행 중 오류:', error);
+        }
     }
 };
