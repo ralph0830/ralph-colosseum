@@ -49,6 +49,51 @@
                 transform: translateX(0) rotate(0deg);
             }
         }
+
+        /* 로그인 화면 페이드 아웃 애니메이션 */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        body {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             min-height: 100vh;
+             background-color: #1a202c; /* 어두운 배경색 */
+        }
+
+        .game-container {
+             width: 100%;
+             max-width: 400px; /* 최대 너비 설정 */
+             padding: 20px;
+             box-sizing: border-box;
+        }
+
+        #authScreen {
+            background: none; /* 배경 제거 */
+            backdrop-filter: none; /* 블러 효과 제거 */
+            box-shadow: none; /* 그림자 제거 */
+            padding: 0; /* 패딩 제거 */
+            margin-bottom: 0; /* 마진 제거 */
+            flex-grow: 0; /* flex grow 제거 */
+        }
+
+         #authScreen input {
+            background-color: #2d3748; /* 어두운 입력창 배경 */
+            color: #e2e8f0; /* 밝은 글자색 */
+            border-color: #4a5568; /* 테두리색 */
+         }
+
+         #authScreen input:focus {
+             ring-color: #ecc94b; /* 포커스 시 테두리색 */
+             border-color: transparent;
+         }
     </style>
 </head>
 <body>
@@ -103,7 +148,7 @@
         </div>
 
 
-        <div id="battleScreen" class="hidden flex-grow flex flex-col" role="region" aria-label="전투 화면">
+        <div id="battleScreen" class="hidden flex-grow flex flex-col relative" role="region" aria-label="전투 화면">
             <div class="flex items-center bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl mb-2 sm:mb-3">
                 <div id="roundInfo" class="text-sm sm:text-lg font-bold text-yellow-400 mr-auto" role="status" aria-live="polite">턴: ${this.currentBattleTurn} / ${GameConfig.TOTAL_BATTLE_TURNS}</div>
                 
@@ -121,7 +166,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
+            <div class="grid grid-cols-2 gap-2 mb-2 sm:mb-3 h-[250px]">
                 <div class="player-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl text-center">
                     <h2 id="playerNameDisplay" class="text-sm sm:text-lg font-semibold mb-1 text-indigo-400">플레이어</h2>
                     <img id="playerJobImage" src="https://placehold.co/80x80/7F00FF/FFFFFF?text=P" alt="플레이어 직업" class="mx-auto mb-1 rounded-full w-12 h-12 sm:w-16 sm:h-16 border-2 border-indigo-500" loading="lazy">
@@ -148,81 +193,80 @@
             </div>
 
             <div class="flex-grow flex flex-col">
-                <!-- 전투 로그 영역 (기본적으로 숨김) -->
-                <div id="battleLogContainer" class="hidden flex-grow">
-                    <div class="battle-log-area bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl flex-grow overflow-hidden flex flex-col min-h-[300px]"> 
-                        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
-                        <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-600 p-1 sm:p-2 rounded-md space-y-1 text-xs" role="log" aria-label="전투 로그">
+                <!-- 전투 로그 영역 (레이어 형태로 표시) -->
+                <div id="battleLogContainer" class="fixed bottom-0 left-0 right-0 z-[9999] w-full h-[384px] sm:h-[512px]" style="display:none;">
+                    <div class="battle-log-area bg-gray-800/90 backdrop-blur-sm p-2 sm:p-3 rounded-lg shadow-xl flex flex-col overflow-hidden h-full">
+                        <h3 class="text-xs sm:text-sm font-semibold mb-1 sm:mb-2 text-gray-300">전투 로그</h3>
+                        <div id="battleLog" class="flex-grow overflow-y-auto bg-gray-700/80 p-1 sm:p-2 rounded-md space-y-1 text-[10px]" role="log" aria-label="전투 로그">
                         </div>
                     </div>
                 </div>
 
                 <!-- 스킬 표시 영역 -->
-                <div class="mt-2 sm:mt-3">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="mt-2 sm:mt-3 flex-grow flex flex-col">
+                    <div class="grid grid-cols-2 gap-2 flex-grow">
                         <!-- 플레이어 스킬 영역 -->
-                        <div class="bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl">
-                            <h3 class="text-sm font-semibold text-indigo-300 mb-2">플레이어 스킬</h3>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div id="playerBattleSkill1" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 1</div>
+                        <div class="bg-gray-700 p-1 sm:p-1.5 rounded-lg shadow-xl flex flex-col h-[180px]">
+                            <h3 class="text-[0.8rem] font-semibold text-indigo-300 mb-1">플레이어 스킬</h3>
+                            <div class="grid grid-cols-3 gap-1 flex-grow">
+                                <div id="playerBattleSkill1" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 1</div>
                                 </div>
-                                <div id="playerBattleSkill2" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 2</div>
+                                <div id="playerBattleSkill2" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 2</div>
                                 </div>
-                                <div id="playerBattleSkill3" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 3</div>
+                                <div id="playerBattleSkill3" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 3</div>
                                 </div>
-                                <div id="playerBattleSkill4" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 4</div>
+                                <div id="playerBattleSkill4" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 4</div>
                                 </div>
-                                <div id="playerBattleSkill5" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 5</div>
+                                <div id="playerBattleSkill5" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 5</div>
                                 </div>
-                                <div id="playerBattleSkill6" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 6</div>
+                                <div id="playerBattleSkill6" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 6</div>
                                 </div>
-                     </div>
-             </div>
+                            </div>
+                        </div>
 
                         <!-- 상대방 스킬 영역 -->
-                        <div class="bg-gray-700 p-2 sm:p-3 rounded-lg shadow-xl">
-                            <h3 class="text-sm font-semibold text-teal-300 mb-2">상대방 스킬</h3>
-                            <div class="grid grid-cols-3 gap-2">
-                                <div id="opponentBattleSkill1" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 1</div>
+                        <div class="bg-gray-700 p-1 sm:p-1.5 rounded-lg shadow-xl flex flex-col h-[180px]">
+                            <h3 class="text-[0.8rem] font-semibold text-teal-300 mb-1">상대방 스킬</h3>
+                            <div class="grid grid-cols-3 gap-1 flex-grow">
+                                <div id="opponentBattleSkill1" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 1</div>
                                 </div>
-                                <div id="opponentBattleSkill2" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 2</div>
+                                <div id="opponentBattleSkill2" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 2</div>
                                 </div>
-                                <div id="opponentBattleSkill3" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 3</div>
+                                <div id="opponentBattleSkill3" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 3</div>
                                 </div>
-                                <div id="opponentBattleSkill4" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 4</div>
+                                <div id="opponentBattleSkill4" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 4</div>
                                 </div>
-                                <div id="opponentBattleSkill5" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 5</div>
+                                <div id="opponentBattleSkill5" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 5</div>
                                 </div>
-                                <div id="opponentBattleSkill6" class="skill-slot bg-gray-600 p-2 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[50px]">
-                                    <div class="text-xs font-semibold text-white">스킬 6</div>
+                                <div id="opponentBattleSkill6" class="skill-slot p-1 rounded-lg text-center cursor-pointer hover:bg-gray-500 transition-colors min-h-[15px]">
+                                    <div class="text-[0.5rem] font-semibold text-white truncate">스킬 6</div>
                                 </div>
-                      </div>
-                   </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 전투 로그 토글 버튼 -->
-            <div class="fixed bottom-4 right-4 z-50 bg-gray-700 p-2 rounded-lg shadow-xl flex items-center space-x-2">
-                <label for="battleLogToggle" class="text-xs text-gray-400">전투 로그:</label>
-                   <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
-                    <input type="checkbox" name="battleLogToggle" id="battleLogToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
-                       <label for="battleLogToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
-                   </div>
-                <span id="battleLogStatus" class="text-xs text-indigo-400 w-8 text-center">OFF</span>
-               </div>
+        <!-- 전투 로그 토글 버튼 (battleScreen 바깥, game-container 내부, fixed 위치로 변경) -->
+        <div class="fixed bottom-4 right-4 z-[9999] bg-gray-700 p-2 rounded-lg shadow-xl flex items-center space-x-2">
+            <label for="battleLogToggle" class="text-xs text-gray-400">전투 로그:</label>
+            <div class="relative inline-block w-8 h-4 sm:w-10 sm:h-5 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="battleLogToggle" id="battleLogToggle" class="toggle-checkbox absolute block w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white border-2 sm:border-4 appearance-none cursor-pointer"/>
+                <label for="battleLogToggle" class="toggle-label block overflow-hidden h-4 sm:h-5 rounded-full bg-gray-500 cursor-pointer"></label>
+            </div>
+            <span id="battleLogStatus" class="text-xs text-indigo-400 w-8 text-center">OFF</span>
         </div>
 
         <div id="gameOverModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden z-50 p-4">

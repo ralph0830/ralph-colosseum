@@ -10,11 +10,55 @@ const EventHandler = {
     initializeEventListeners() {
         console.log('Initializing event listeners...');
         
+        // 전투 로그 토글
+        const battleLogToggle = document.getElementById('battleLogToggle');
+        const battleLogContainer = document.getElementById('battleLogContainer');
+        const battleLogStatus = document.getElementById('battleLogStatus');
+        
+        if (battleLogToggle && battleLogContainer && battleLogStatus) {
+            battleLogToggle.addEventListener('change', () => {
+                if (battleLogToggle.checked) {
+                    battleLogContainer.style.display = 'block';
+                    battleLogStatus.textContent = 'ON';
+                } else {
+                    battleLogContainer.style.display = 'none';
+                    battleLogStatus.textContent = 'OFF';
+                }
+            });
+        }
+
+        // 로그인 화면 Enter 키 이벤트
+        const emailInput = UIManager.elements.emailInput;
+        const passwordInput = UIManager.elements.passwordInput;
+        const loginButton = UIManager.elements.loginButton;
+
+        if (emailInput) {
+            emailInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (passwordInput) {
+                        passwordInput.focus();
+                    }
+                }
+            });
+        }
+
+        if (passwordInput) {
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (loginButton) {
+                         loginButton.click(); // 로그인 버튼 클릭 이벤트 발생
+                    }
+                }
+            });
+        }
+
         // 로그인 버튼
-        if (UIManager.elements.loginButton) {
-            UIManager.elements.loginButton.addEventListener('click', async () => {
-                const email = UIManager.elements.emailInput.value;
-                const password = UIManager.elements.passwordInput.value;
+        if (loginButton) {
+            loginButton.addEventListener('click', async () => {
+                const email = emailInput.value;
+                const password = passwordInput.value;
                 
                 if (!email || !password) {
                     UIManager.elements.authMessage.textContent = "이메일과 비밀번호를 모두 입력해주세요.";
@@ -31,6 +75,10 @@ const EventHandler = {
                     UIManager.elements.authMessage.textContent = "로그인 성공!";
                     UIManager.elements.authMessage.classList.remove('text-yellow-400');
                     UIManager.elements.authMessage.classList.add('text-green-400');
+                } else {
+                     // 로그인 실패 시 메시지는 AuthManager에서 처리됩니다.
+                     UIManager.elements.authMessage.classList.remove('text-yellow-400', 'text-green-400');
+                     UIManager.elements.authMessage.classList.add('text-red-400');
                 }
             });
         }

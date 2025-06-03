@@ -23,6 +23,11 @@ const BattleController = {
                 UIManager.elements.battleLog.innerHTML = '';
             }
 
+            // 전투 로그 컨테이너 초기 상태 (숨김 처리 제거)
+            // if (UIManager.elements.battleLogContainer) {
+            //     UIManager.elements.battleLogContainer.classList.add('hidden');
+            // }
+
             // 스킬 표시 업데이트
             UIManager.updateBattleSkills(GameController.player.selectedSkills);
 
@@ -59,7 +64,6 @@ const BattleController = {
             // 강제 자동 진행 시작
             this.isAutoProceedEnabled = true;
             if (UIManager.elements.autoProceedToggle) {
-                UIManager.elements.autoProceedToggle.checked = this.isAutoProceedEnabled;
                 UIManager.elements.autoProceedStatus.textContent = this.isAutoProceedEnabled ? "ON" : "OFF";
             }
             this.startAutoProceed();

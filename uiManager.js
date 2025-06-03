@@ -75,9 +75,8 @@ const UIManager = {
         console.log('UI Elements initialized:', this.elements);
         console.log('nextRoundButton in UIManager.elements:', this.elements.nextRoundButton);
         console.log('autoProceedToggle in UIManager.elements:', this.elements.autoProceedToggle);
-        // 전투 로그 관련 요소 초기화
+        // 전투 로그 관련 요소 초기화 (여기서 hidden 클래스 제거)
         if (this.elements.battleLogContainer) {
-            this.elements.battleLogContainer.classList.add('hidden');
             if (this.elements.battleLogStatus) {
                 this.elements.battleLogStatus.textContent = 'OFF';
             }
@@ -86,12 +85,25 @@ const UIManager = {
 
     initializeEventListeners() {
         // 전투 로그 토글 이벤트
-        if (this.elements.battleLogToggle) {
+        if (this.elements.battleLogToggle && this.elements.battleLogContainer) { // battleLogContainer도 있는지 확인
             this.elements.battleLogToggle.addEventListener('change', (e) => {
                 const isVisible = e.target.checked;
+                console.log(`[전투 로그 토글 변경] 체크됨: ${isVisible}`); // 디버그 로그
                 this.elements.battleLogContainer.classList.toggle('hidden', !isVisible);
                 this.elements.battleLogStatus.textContent = isVisible ? 'ON' : 'OFF';
+                console.log('battleLogContainer hidden 클래스 상태:', this.elements.battleLogContainer.classList.contains('hidden')); // 디버그 로그
+                 // 토글 시 스크롤 위치 조정
+                 if(isVisible) {
+                    // 약간의 지연 후 스크롤 (레이아웃 변경 적용 시간 필요)
+                    setTimeout(() => {
+                        this.elements.battleLog.scrollTop = this.elements.battleLog.scrollHeight;
+                         console.log('토글 후 스크롤 위치 조정', this.elements.battleLog.scrollTop, this.elements.battleLog.scrollHeight); // 디버그 로그
+                    }, 50); // 50ms 지연
+                 }
             });
+             console.log('전투 로그 토글 이벤트 리스너 초기화됨'); // 디버그 로그
+        } else {
+             console.warn('전투 로그 토글 또는 컨테이너 요소가 없어 이벤트 리스너를 초기화할 수 없습니다.'); // 경고 로그
         }
     },
 
@@ -109,7 +121,17 @@ const UIManager = {
 
         screenElement.classList.remove('hidden');
         if (screenElement !== this.elements.authScreen) { 
-             screenElement.classList.add('flex', 'flex-col');
+            screenElement.classList.add('flex', 'flex-col');
+        }
+
+        // 전투 화면일 때만 전투 로그 토글 표시, 아니면 숨김
+        const battleLogToggle = document.querySelector('.absolute.bottom-4.right-4');
+        if (battleLogToggle) {
+            if (screenElement === this.elements.battleScreen) {
+                battleLogToggle.style.display = 'flex';
+            } else {
+                battleLogToggle.style.display = 'none';
+            }
         }
     },
 
@@ -196,9 +218,10 @@ const UIManager = {
     },
 
     logToBattleLog(message, type = 'info') {
+        console.log(`[logToBattleLog 호출됨] 메시지: ${message}, 타입: ${type}`); // 디버그 로그
         const logEntry = document.createElement('p');
-        logEntry.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}] ${message}`;
-        logEntry.classList.add('log-entry', 'rounded', 'px-1', 'py-0.5'); 
+        logEntry.textContent = message;
+        logEntry.classList.add('log-entry', 'rounded', 'px-1', 'py-0.5', 'text-xs');
         switch(type) {
             case 'damage': logEntry.classList.add('text-red-300'); break;
             case 'heal': logEntry.classList.add('text-green-300'); break;
@@ -207,8 +230,15 @@ const UIManager = {
             case 'system': logEntry.classList.add('text-blue-300'); break;
             default: logEntry.classList.add('text-gray-300');
         }
-        this.elements.battleLog.appendChild(logEntry);
-        this.elements.battleLog.scrollTop = this.elements.battleLog.scrollHeight; 
+        if (this.elements.battleLog) {
+             this.elements.battleLog.appendChild(logEntry);
+             console.log('로그 항목 추가됨', logEntry); // 디버그 로그
+             // 스크롤을 최신 로그로 이동
+             this.elements.battleLog.scrollTop = this.elements.battleLog.scrollHeight;
+             console.log('스크롤 위치 이동', this.elements.battleLog.scrollTop, this.elements.battleLog.scrollHeight); // 디버그 로그
+        } else {
+            console.error('UIManager.elements.battleLog가 초기화되지 않았습니다!'); // 에러 로그
+        }
     },
     
     displayCurrentRoundSkill(targetPlayer, skillName, skillDescription = "") {
@@ -221,15 +251,32 @@ const UIManager = {
     },
     
     triggerScreenEffect(effectType) {
-        this.elements.gameContainer.classList.remove('screen-shake', 'screen-flash-red', 'screen-flash-blue'); 
-        void this.elements.gameContainer.offsetWidth; 
-        if (effectType === 'shake') this.elements.gameContainer.classList.add('screen-shake');
-        else if (effectType === 'flash-red') this.elements.gameContainer.classList.add('screen-flash-red');
-        else if (effectType === 'flash-blue') this.elements.gameContainer.classList.add('screen-flash-blue');
+        // 화면 효과를 위한 별도의 컨테이너 생성
+        let effectContainer = document.getElementById('screenEffectContainer');
+        if (!effectContainer) {
+            effectContainer = document.createElement('div');
+            effectContainer.id = 'screenEffectContainer';
+            effectContainer.style.position = 'fixed';
+            effectContainer.style.top = '0';
+            effectContainer.style.left = '0';
+            effectContainer.style.width = '100%';
+            effectContainer.style.height = '100%';
+            effectContainer.style.pointerEvents = 'none';
+            effectContainer.style.zIndex = '9999'; // 높은 z-index 값으로 설정
+            effectContainer.style.mixBlendMode = 'overlay'; // 블렌드 모드 추가
+            document.body.appendChild(effectContainer);
+        }
+
+        effectContainer.classList.remove('screen-shake', 'screen-flash-red', 'screen-flash-blue');
+        void effectContainer.offsetWidth;
+        
+        if (effectType === 'shake') effectContainer.classList.add('screen-shake');
+        else if (effectType === 'flash-red') effectContainer.classList.add('screen-flash-red');
+        else if (effectType === 'flash-blue') effectContainer.classList.add('screen-flash-blue');
         
         setTimeout(() => {
-            this.elements.gameContainer.classList.remove('screen-shake', 'screen-flash-red', 'screen-flash-blue');
-        }, 300); 
+            effectContainer.classList.remove('screen-shake', 'screen-flash-red', 'screen-flash-blue');
+        }, 300);
     },
 
     populateJobSelectionForPlayer() {
@@ -565,17 +612,17 @@ const UIManager = {
                 if (!skillElement) return;
 
                 if (skill && skill.skillKey) { // skill.skillKey가 있는지 확인
-                    const skillData = GameData.allSkills[skill.skillKey];
+                    const skillData = GameData.allSkills[skill.skillKey]; // skill 객체 가져옴
                     if (skillData) {
                         skillElement.innerHTML = `
-                            <div class="text-xs font-semibold text-white">${skillData.name}</div>
-                         `;
+                            <div class="text-xs font-semibold text-white truncate">${skillData.name}</div>
+                         `; // truncate 클래스 추가
                         skillElement.classList.remove('bg-gray-600');
                         skillElement.classList.add('bg-gray-500');
                     } else { // skillKey는 있지만 GameData에 없는 경우
                         skillElement.innerHTML = `
-                            <div class="text-xs font-semibold text-gray-400">알 수 없음</div>
-                         `;
+                            <div class="text-xs font-semibold text-gray-400 truncate">알 수 없음</div>
+                         `; // truncate 클래스 추가
                          skillElement.classList.remove('bg-gray-600');
                          skillElement.classList.add('bg-gray-500');
                          console.warn(`GameData에 없는 스킬 키: ${skill.skillKey}`);
@@ -601,14 +648,14 @@ const UIManager = {
                      const skill = GameData.allSkills[skillData.skillKey]; // skill 객체 가져옴
                     if (skill) {
                         skillElement.innerHTML = `
-                            <div class="text-xs font-semibold text-white">${skill.name}</div>
-                         `;
+                            <div class="text-xs font-semibold text-white truncate">${skill.name}</div>
+                         `; // truncate 클래스 추가
                         skillElement.classList.remove('bg-gray-600');
                         skillElement.classList.add('bg-gray-500');
-                    } else { // skillKey는 있지만 GameData에 없는 경우
+                    } else {
                          skillElement.innerHTML = `
-                            <div class="text-xs font-semibold text-gray-400">알 수 없음</div>
-                         `;
+                            <div class="text-xs font-semibold text-gray-400 truncate">알 수 없음</div>
+                         `; // truncate 클래스 추가
                          skillElement.classList.remove('bg-gray-600');
                          skillElement.classList.add('bg-gray-500');
                          console.warn(`GameData에 없는 상대방 스킬 키: ${skillData.skillKey}`);
@@ -630,9 +677,9 @@ const UIManager = {
         if (this.elements.playerBattleSkills) {
             this.elements.playerBattleSkills.forEach((skillElement, i) => {
                 if (i === playerSkillIndex) {
-                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-400', 'animate-pulse');
+                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-400');
                 } else {
-                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-400', 'animate-pulse');
+                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-400');
                 }
             });
         }
@@ -641,11 +688,43 @@ const UIManager = {
         if (this.elements.opponentBattleSkills) {
             this.elements.opponentBattleSkills.forEach((skillElement, i) => {
                 if (i === opponentSkillIndex) {
-                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-teal-400', 'animate-pulse');
+                    skillElement.classList.add('ring-2', 'ring-offset-2', 'ring-teal-400');
                 } else {
-                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-teal-400', 'animate-pulse');
+                    skillElement.classList.remove('ring-2', 'ring-offset-2', 'ring-teal-400');
                 }
             });
         }
+    },
+
+    showJobSelectionScreen() {
+        // 모든 화면 숨기기
+        this.hideAllScreens();
+        
+        // 직업 선택 화면 표시
+        this.elements.jobSelectionScreen.classList.remove('hidden');
+        this.elements.jobSelectionScreen.classList.add('flex');
+        
+        // 직업 선택 버튼 비활성화
+        this.elements.confirmJobButton.disabled = true;
+        
+        // 직업 목록 렌더링
+        this.renderJobOptions();
+    },
+
+    hideAllScreens() {
+        const screens = [
+            this.elements.authScreen,
+            this.elements.jobSelectionScreen,
+            this.elements.skillSelectionScreen,
+            this.elements.skillManagementScreen,
+            this.elements.battleScreen
+        ];
+        
+        screens.forEach(screen => {
+            if (screen) {
+                screen.classList.add('hidden');
+                screen.classList.remove('flex');
+            }
+        });
     },
 };

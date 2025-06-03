@@ -68,26 +68,34 @@ const AuthManager = {
         }
     },
 
-    checkAuthState() {
-        const user = FirebaseService.auth.currentUser;
-        if (user) {
-            console.log(`현재 로그인된 사용자: ${user.email} (${user.uid})`);
-            if (localStorage.getItem('lastLoginTime')) {
-                const lastLogin = new Date(localStorage.getItem('lastLoginTime'));
-                const now = new Date();
-                const hoursSinceLastLogin = (now - lastLogin) / (1000 * 60 * 60);
-                
-                if (hoursSinceLastLogin > 24) {
-                    console.log('24시간이 지나 자동 로그아웃됩니다.');
-                    this.logout();
-                    return;
+    async checkAuthState() {
+        return new Promise((resolve) => {
+            FirebaseService.auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log(`사용자 인증 상태 확인: ${user.email} (${user.uid})`);
+                    // 이전 세션에서 저장된 인증 정보가 있는 경우
+                    if (localStorage.getItem('lastLoginTime')) {
+                        const lastLogin = new Date(localStorage.getItem('lastLoginTime'));
+                        const now = new Date();
+                        const hoursSinceLastLogin = (now - lastLogin) / (1000 * 60 * 60);
+                        
+                        if (hoursSinceLastLogin > 24) {
+                            console.log('24시간이 지나 자동 로그아웃됩니다.');
+                            this.logout();
+                            return;
+                        }
+                    }
+                    localStorage.setItem('lastLoginTime', new Date().toISOString());
+                    GameController.updateUIBasedOnAuthState(user);
+                    resolve(true);
+                } else {
+                    console.log('사용자가 로그아웃되었거나 인증되지 않았습니다.');
+                    localStorage.removeItem('lastLoginTime');
+                    GameController.updateUIBasedOnAuthState(null);
+                    resolve(false);
                 }
-            }
-            GameController.updateUIBasedOnAuthState(user);
-        } else {
-            console.log('로그인된 사용자가 없습니다.');
-            GameController.updateUIBasedOnAuthState(null);
-        }
+            });
+        });
     },
 
     getAuthErrorMessage(errorCode) {
